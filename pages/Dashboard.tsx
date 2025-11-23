@@ -1,12 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Appointment, AppointmentStatus, User, UserRole } from '../types';
-import { PROVIDERS, SERVICES, TRANSLATIONS } from '../constants';
+import { Appointment, AppointmentStatus, User, UserRole, Service, Provider } from '../types';
+import { TRANSLATIONS } from '../constants';
 import { Card, Button, Badge, Text, Avatar, Input, IconButton, Modal } from '../components/NovaUI';
 import { Language } from '../App';
 
 interface DashboardProps {
   user: User;
   appointments: Appointment[];
+  services: Service[];
+  providers: Provider[];
   onNewBooking: () => void;
   onCancel: (id: string) => void;
   lang: Language;
@@ -15,9 +17,16 @@ interface DashboardProps {
 
 // --- Components ---
 
-const AppointmentCard: React.FC<{ appointment: Appointment, onCancel: (id: string) => void, t: any, lang: Language }> = ({ appointment, onCancel, t, lang }) => {
-  const service = SERVICES.find(s => s.id === appointment.serviceId);
-  const provider = PROVIDERS.find(p => p.id === appointment.providerId);
+const AppointmentCard: React.FC<{ 
+    appointment: Appointment, 
+    services: Service[], 
+    providers: Provider[], 
+    onCancel: (id: string) => void, 
+    t: any, 
+    lang: Language 
+}> = ({ appointment, services, providers, onCancel, t, lang }) => {
+  const service = services.find(s => s.id === appointment.serviceId);
+  const provider = providers.find(p => p.id === appointment.providerId);
   const dateObj = new Date(appointment.date);
 
   const getStatusBadge = () => {
@@ -75,9 +84,15 @@ const AppointmentCard: React.FC<{ appointment: Appointment, onCancel: (id: strin
   );
 }
 
-const HistoryRow: React.FC<{ appointment: Appointment, t: any, lang: Language }> = ({ appointment, t, lang }) => {
-  const service = SERVICES.find(s => s.id === appointment.serviceId);
-  const provider = PROVIDERS.find(p => p.id === appointment.providerId);
+const HistoryRow: React.FC<{ 
+    appointment: Appointment, 
+    services: Service[], 
+    providers: Provider[], 
+    t: any, 
+    lang: Language 
+}> = ({ appointment, services, providers, t, lang }) => {
+  const service = services.find(s => s.id === appointment.serviceId);
+  const provider = providers.find(p => p.id === appointment.providerId);
   const dateObj = new Date(appointment.date);
 
   const getStatusBadge = () => {
@@ -122,11 +137,13 @@ const HistoryRow: React.FC<{ appointment: Appointment, t: any, lang: Language }>
 
 const PatientDashboard: React.FC<{ 
     appointments: Appointment[], 
+    services: Service[],
+    providers: Provider[],
     onNewBooking: () => void, 
     onCancel: (id: string) => void,
     t: any,
     lang: Language
-}> = ({ appointments, onNewBooking, onCancel, t, lang }) => {
+}> = ({ appointments, services, providers, onNewBooking, onCancel, t, lang }) => {
   
   const [activeTab, setActiveTab] = useState<'upcoming' | 'history'>('upcoming');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
@@ -163,8 +180,8 @@ const PatientDashboard: React.FC<{
     
     return list.filter(a => {
         // Search Filter
-        const provider = PROVIDERS.find(p => p.id === a.providerId);
-        const service = SERVICES.find(s => s.id === a.serviceId);
+        const provider = providers.find(p => p.id === a.providerId);
+        const service = services.find(s => s.id === a.serviceId);
         const matchesSearch = searchQuery === '' || 
             (provider?.name.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
             (service?.name.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
@@ -190,7 +207,7 @@ const PatientDashboard: React.FC<{
 
         return matchesStatus && matchesSearch && matchesDate;
     });
-  }, [activeTab, upcoming, history, filterStatus, searchQuery, dateFrom, dateTo]);
+  }, [activeTab, upcoming, history, filterStatus, searchQuery, dateFrom, dateTo, providers, services]);
 
   // Reset filters when changing tabs
   useEffect(() => {
@@ -239,10 +256,10 @@ const PatientDashboard: React.FC<{
                         {t.up_next}
                       </span>
                       <Text variant="h2" className="text-white mb-1">
-                        {SERVICES.find(s => s.id === nextAppointment.serviceId)?.name}
+                        {services.find(s => s.id === nextAppointment.serviceId)?.name}
                       </Text>
                       <p className="text-primary-100 text-lg mb-6 font-medium">
-                        {PROVIDERS.find(p => p.id === nextAppointment.providerId)?.name}
+                        {providers.find(p => p.id === nextAppointment.providerId)?.name}
                       </p>
                       <div className="flex gap-6 justify-center md:justify-start text-sm font-semibold text-white/90">
                          <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl border border-white/5"><i className="fas fa-calendar"></i> {new Date(nextAppointment.date).toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}</span>
@@ -362,7 +379,9 @@ const PatientDashboard: React.FC<{
                         activeTab === 'upcoming' ? (
                             <AppointmentCard 
                                 key={apt.id} 
-                                appointment={apt} 
+                                appointment={apt}
+                                services={services}
+                                providers={providers} 
                                 onCancel={initiateCancel} 
                                 t={t} 
                                 lang={lang}
@@ -370,7 +389,9 @@ const PatientDashboard: React.FC<{
                         ) : (
                             <HistoryRow 
                                 key={apt.id} 
-                                appointment={apt} 
+                                appointment={apt}
+                                services={services}
+                                providers={providers} 
                                 t={t} 
                                 lang={lang} 
                             />
@@ -410,9 +431,10 @@ const PatientDashboard: React.FC<{
 const ProviderDashboard: React.FC<{
     user: User,
     appointments: Appointment[],
+    services: Service[],
     t: any,
     lang: Language
-}> = ({ user, appointments, t, lang }) => {
+}> = ({ user, appointments, services, t, lang }) => {
     
     const myAppointments = appointments.filter(a => a.providerId === user.id && a.status !== AppointmentStatus.CANCELLED);
     const today = new Date();
@@ -496,7 +518,7 @@ const ProviderDashboard: React.FC<{
                                         <Avatar src={`https://picsum.photos/200?random=${idx}`} name="Patient" size="md" />
                                         <div className="flex-1">
                                             <Text variant="h4" className="text-base">{t.patient_id} #{apt.userId.substring(0,3)}</Text>
-                                            <Text variant="caption">{SERVICES.find(s => s.id === apt.serviceId)?.name}</Text>
+                                            <Text variant="caption">{services.find(s => s.id === apt.serviceId)?.name}</Text>
                                         </div>
                                         <Button size="sm" variant="secondary" className="bg-white">
                                             {t.patient_details}
@@ -521,7 +543,7 @@ const ProviderDashboard: React.FC<{
                                 </div>
                                 <Text variant="h3" className="mb-1">{t.patient_id} #{todayAppointments[0].userId}</Text>
                                 <Badge status="info" icon="fa-stethoscope" >
-                                    {SERVICES.find(s => s.id === todayAppointments[0].serviceId)?.name}
+                                    {services.find(s => s.id === todayAppointments[0].serviceId)?.name}
                                 </Badge>
                                 
                                 <div className="w-full bg-surface rounded-2xl p-5 my-8 border border-gray-100">
@@ -552,23 +574,18 @@ const ProviderDashboard: React.FC<{
     );
 };
 
-const Dashboard: React.FC<DashboardProps> = ({ user, appointments, onNewBooking, onCancel, lang, setLoading }) => {
+const Dashboard: React.FC<DashboardProps> = ({ user, appointments, services, providers, onNewBooking, onCancel, lang, setLoading }) => {
   const t = TRANSLATIONS[lang];
 
-  // Simulate data fetching on mount
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  // Simulate data fetching on mount - moved to App.tsx for global state, but keeping simple local effect if needed for refresh
+  // We can rely on props update from App.tsx
 
   if (user.role === UserRole.PROVIDER) {
     return (
       <ProviderDashboard 
         user={user} 
         appointments={appointments} 
+        services={services}
         t={t} 
         lang={lang} 
       />
@@ -578,6 +595,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, appointments, onNewBooking,
   return (
     <PatientDashboard 
       appointments={appointments} 
+      services={services}
+      providers={providers}
       onNewBooking={onNewBooking} 
       onCancel={onCancel} 
       t={t} 

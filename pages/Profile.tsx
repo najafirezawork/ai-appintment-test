@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { User, UserRole } from '../types';
-import { PROVIDERS, TRANSLATIONS } from '../constants';
+import { User, UserRole, Provider } from '../types';
+import { TRANSLATIONS } from '../constants';
 import { Card, Button, Text, Avatar, Input, Badge } from '../components/NovaUI';
 import { Language } from '../App';
 
 interface ProfileProps {
   user: User;
+  providers: Provider[];
   onUpdateUser: (updatedUser: User) => void;
   lang: Language;
 }
 
-const Profile: React.FC<ProfileProps> = ({ user, onUpdateUser, lang }) => {
+const Profile: React.FC<ProfileProps> = ({ user, providers, onUpdateUser, lang }) => {
   const t = TRANSLATIONS[lang];
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onUpdateUser, lang }) => {
   });
 
   const providerDetails = user.role === UserRole.PROVIDER 
-    ? PROVIDERS.find(p => p.id === user.id) 
+    ? providers.find(p => p.id === user.id) 
     : null;
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onUpdateUser, lang }) => {
   };
 
   const handleSave = () => {
-    // In a real app, this would make an API call
+    // onUpdateUser triggers the API call in App.tsx
     onUpdateUser({
       ...user,
       name: formData.name,

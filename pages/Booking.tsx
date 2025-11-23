@@ -1,33 +1,21 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { User, Appointment, Service, Provider, AppointmentStatus } from '../types';
-import { SERVICES, PROVIDERS, TRANSLATIONS } from '../constants';
+import { TRANSLATIONS } from '../constants';
 import { Button, Card, Text, Avatar, Badge, IconButton, Input } from '../components/NovaUI';
 import { getSmartRecommendation } from '../services/geminiService';
 
 interface BookingProps {
   user: User;
+  services: Service[];
+  providers: Provider[];
   onBookingComplete: (apt: Appointment) => void;
   onCancel: () => void;
 }
 
 type Step = 'SERVICE' | 'PROVIDER' | 'DATETIME' | 'CONFIRM';
 
-const getSpecialtyIcon = (specialty: string) => {
-    const s = specialty.toLowerCase();
-    if (s.includes('cardio') || s.includes('heart')) return 'fa-heart-pulse';
-    if (s.includes('dentist') || s.includes('tooth')) return 'fa-tooth';
-    if (s.includes('vision') || s.includes('eye')) return 'fa-eye';
-    if (s.includes('physio') || s.includes('therap')) return 'fa-person-running';
-    if (s.includes('general')) return 'fa-user-doctor';
-    if (s.includes('neuro')) return 'fa-brain';
-    if (s.includes('derm')) return 'fa-spa';
-    if (s.includes('ortho')) return 'fa-bone';
-    if (s.includes('pediat')) return 'fa-baby';
-    return 'fa-stethoscope';
-};
-
-const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) => {
+const Booking: React.FC<BookingProps> = ({ user, services, providers, onBookingComplete, onCancel }) => {
   const [step, setStep] = useState<Step>('SERVICE');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
@@ -53,8 +41,8 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
   // Filter Logic
   const filteredProviders = useMemo(() => {
     let list = selectedService 
-        ? PROVIDERS.filter(p => p.services.includes(selectedService.id))
-        : PROVIDERS;
+        ? providers.filter(p => p.services.includes(selectedService.id))
+        : providers;
 
     // 1. Search Query
     if (searchQuery) {
@@ -73,7 +61,7 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
     }
 
     return list;
-  }, [selectedService, searchQuery, onlyAvailableToday, sortBy]);
+  }, [selectedService, searchQuery, onlyAvailableToday, sortBy, providers]);
 
   // Pagination Logic
   const totalPages = Math.ceil(filteredProviders.length / itemsPerPage);
@@ -153,16 +141,17 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
   const handleAiSearch = async () => {
     if (!prompt.trim()) return;
     setAiLoading(true);
-    const result = await getSmartRecommendation(prompt);
+    // Pass current services/providers to context
+    const result = await getSmartRecommendation(prompt, services, providers);
     setAiLoading(false);
 
     if (result) {
       if (result.serviceId) {
-        const service = SERVICES.find(s => s.id === result.serviceId);
+        const service = services.find(s => s.id === result.serviceId);
         if (service) setSelectedService(service);
       }
       if (result.providerId) {
-        const provider = PROVIDERS.find(p => p.id === result.providerId);
+        const provider = providers.find(p => p.id === result.providerId);
         if (provider) setSelectedProvider(provider);
       }
       if (result.reasoning) {
@@ -179,7 +168,7 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
   const handleConfirm = () => {
     if (selectedService && selectedProvider && selectedSlot) {
       const newAppointment: Appointment = {
-        id: Date.now().toString(),
+        id: Date.now().toString(), // Temporary ID, will be handled by API in real app
         userId: user.id,
         serviceId: selectedService.id,
         providerId: selectedProvider.id,
@@ -372,7 +361,7 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {SERVICES.map(service => (
+                        {services.map(service => (
                             <div 
                                 key={service.id}
                                 onClick={() => {

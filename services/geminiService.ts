@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { PROVIDERS, SERVICES } from "../constants";
+import { Provider, Service } from "../types";
 
-export const getSmartRecommendation = async (userQuery: string) => {
+export const getSmartRecommendation = async (userQuery: string, services: Service[], providers: Provider[]) => {
   if (!process.env.API_KEY) {
     console.warn("API Key not found");
     return null;
@@ -12,8 +12,8 @@ export const getSmartRecommendation = async (userQuery: string) => {
   const prompt = `
     User Query (likely in Persian): "${userQuery}"
     
-    Available Services: ${JSON.stringify(SERVICES.map(s => ({ id: s.id, name: s.name, description: s.description })))}
-    Available Providers: ${JSON.stringify(PROVIDERS.map(p => ({ id: p.id, name: p.name, specialty: p.specialty, serviceIds: p.services })))}
+    Available Services: ${JSON.stringify(services.map(s => ({ id: s.id, name: s.name, description: s.description })))}
+    Available Providers: ${JSON.stringify(providers.map(p => ({ id: p.id, name: p.name, specialty: p.specialty, serviceIds: p.services })))}
 
     Based on the user query, recommend the most suitable Service ID and Provider ID.
     If the query is vague, pick the best fit General Practitioner.

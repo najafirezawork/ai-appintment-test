@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { AppState, User, Appointment, ViewState, Notification, AppointmentStatus, UserRole } from './types';
-import { MOCK_USER_PATIENT, MOCK_USER_PROVIDER, INITIAL_APPOINTMENTS, TRANSLATIONS } from './constants';
+import { AppState, User, Appointment, ViewState, Notification, AppointmentStatus, UserRole, Service, Provider } from './types';
+import { TRANSLATIONS } from './constants';
 import Layout from './components/Layout';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Booking from './pages/Booking';
 import Profile from './pages/Profile';
 import { GlobalLoader } from './components/NovaUI';
+import { apiService } from './services/apiService';
 
 export type Language = 'fa' | 'en';
+
+interface GlobalData {
+  services: Service[];
+  providers: Provider[];
+}
 
 const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('fa');
   const [state, setState] = useState<AppState>({
     user: null,
     currentView: 'AUTH',
-    appointments: INITIAL_APPOINTMENTS,
+    appointments: [],
     notifications: [],
     isLoading: false,
+  });
+  
+  const [globalData, setGlobalData] = useState<GlobalData>({
+    services: [],
+    providers: [],
   });
 
   const t = TRANSLATIONS[lang];
@@ -26,7 +37,6 @@ const App: React.FC = () => {
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
-    // Update font based on lang
     if (lang === 'en') {
         document.body.style.fontFamily = "'Inter', sans-serif";
     } else {
@@ -34,72 +44,104 @@ const App: React.FC = () => {
     }
   }, [lang]);
 
+  // Initial Data Fetch
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const [services, providers] = await Promise.all([
+                apiService.getServices(),
+                apiService.getProviders()
+            ]);
+            setGlobalData({ services, providers });
+        } catch (error) {
+            console.error("Failed to load initial data", error);
+            addNotification("Failed to load application data", "error");
+        }
+    };
+    fetchData();
+  }, []);
+
   const setLoading = (loading: boolean) => {
     setState(prev => ({ ...prev, isLoading: loading }));
   };
 
-  const handleLogin = (role: UserRole) => {
+  const handleLogin = async (role: UserRole) => {
     setLoading(true);
-    // Simulate API call delay for login
-    setTimeout(() => {
-      const user = role === UserRole.PATIENT ? MOCK_USER_PATIENT : MOCK_USER_PROVIDER;
-      setState(prev => ({ 
-        ...prev, 
-        user: user, 
-        currentView: 'DASHBOARD',
-        isLoading: false 
-      }));
-      addNotification(`${t.welcome} ${user.name}`, 'success');
-    }, 1500);
+    try {
+        const user = await apiService.login(role);
+        const appointments = await apiService.getAppointments(user.id);
+        
+        setState(prev => ({ 
+            ...prev, 
+            user: user, 
+            appointments: appointments,
+            currentView: 'DASHBOARD',
+            isLoading: false 
+        }));
+        addNotification(`${t.welcome} ${user.name}`, 'success');
+    } catch (error) {
+        setLoading(false);
+        addNotification("Login failed", "error");
+    }
   };
 
   const handleLogout = () => {
-    setState(prev => ({ ...prev, user: null, currentView: 'AUTH' }));
+    setState(prev => ({ ...prev, user: null, currentView: 'AUTH', appointments: [] }));
   };
 
   const navigate = (view: ViewState) => {
     setState(prev => ({ ...prev, currentView: view }));
   };
 
-  const addAppointment = (apt: Appointment) => {
+  const handleBookingComplete = async (apt: Appointment) => {
     setLoading(true);
-    // Simulate API call delay for booking
-    setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        appointments: [...prev.appointments, apt],
-        currentView: 'DASHBOARD',
-        isLoading: false
-      }));
-      addNotification(t.status_confirmed, 'success');
-    }, 1500);
-  };
-
-  const cancelAppointment = (id: string) => {
-    // Simulate short delay for cancellation
-    setLoading(true);
-    setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        appointments: prev.appointments.map(a => 
-          a.id === id ? { ...a, status: AppointmentStatus.CANCELLED } : a
-        ),
-        isLoading: false
-      }));
-      addNotification(t.status_cancelled, 'info');
-    }, 800);
-  };
-
-  const handleUpdateUser = (updatedUser: User) => {
-    setLoading(true);
-    setTimeout(() => {
+    try {
+        const newAppointment = await apiService.createAppointment(apt);
         setState(prev => ({
             ...prev,
-            user: updatedUser,
+            appointments: [...prev.appointments, newAppointment],
+            currentView: 'DASHBOARD',
+            isLoading: false
+        }));
+        addNotification(t.status_confirmed, 'success');
+    } catch (error) {
+        setLoading(false);
+        addNotification("Booking failed", "error");
+    }
+  };
+
+  const cancelAppointment = async (id: string) => {
+    setLoading(true);
+    try {
+        await apiService.cancelAppointment(id);
+        setState(prev => ({
+            ...prev,
+            appointments: prev.appointments.map(a => 
+                a.id === id ? { ...a, status: AppointmentStatus.CANCELLED } : a
+            ),
+            isLoading: false
+        }));
+        addNotification(t.status_cancelled, 'info');
+    } catch (error) {
+        setLoading(false);
+        addNotification("Cancellation failed", "error");
+    }
+  };
+
+  const handleUpdateUser = async (updatedUser: User) => {
+    setLoading(true);
+    try {
+        const user = await apiService.updateUser(updatedUser);
+        setState(prev => ({
+            ...prev,
+            user: user,
             isLoading: false
         }));
         addNotification(t.save_changes, 'success');
-    }, 1000);
+    } catch (error) {
+        setLoading(false);
+        addNotification("Update failed", "error");
+    }
   };
 
   const addNotification = (message: string, type: 'success' | 'error' | 'info') => {
@@ -144,26 +186,34 @@ const App: React.FC = () => {
         setLang={setLang}
       >
         {state.currentView === 'AUTH' && <Auth onLogin={handleLogin} lang={lang} />}
-        {state.currentView === 'DASHBOARD' && (
+        
+        {state.currentView === 'DASHBOARD' && state.user && (
           <Dashboard 
-            user={state.user!}
+            user={state.user}
             appointments={state.appointments} 
+            services={globalData.services}
+            providers={globalData.providers}
             onNewBooking={() => navigate('BOOKING')}
             onCancel={cancelAppointment}
             lang={lang}
             setLoading={setLoading}
           />
         )}
+        
         {state.currentView === 'BOOKING' && state.user && (
           <Booking 
             user={state.user}
-            onBookingComplete={addAppointment}
+            services={globalData.services}
+            providers={globalData.providers}
+            onBookingComplete={handleBookingComplete}
             onCancel={() => navigate('DASHBOARD')}
           />
         )}
+        
         {state.currentView === 'PROFILE' && state.user && (
           <Profile 
-            user={state.user} 
+            user={state.user}
+            providers={globalData.providers}
             onUpdateUser={handleUpdateUser} 
             lang={lang} 
           />
