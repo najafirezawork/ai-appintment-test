@@ -15,7 +15,67 @@ interface DashboardProps {
 
 // --- Components ---
 
-const AppointmentCard: React.FC<{ appointment: Appointment, onCancel: (id: string) => void, t: any, lang: Language, isHistory?: boolean }> = ({ appointment, onCancel, t, lang, isHistory = false }) => {
+const AppointmentCard: React.FC<{ appointment: Appointment, onCancel: (id: string) => void, t: any, lang: Language }> = ({ appointment, onCancel, t, lang }) => {
+  const service = SERVICES.find(s => s.id === appointment.serviceId);
+  const provider = PROVIDERS.find(p => p.id === appointment.providerId);
+  const dateObj = new Date(appointment.date);
+
+  const getStatusBadge = () => {
+    switch (appointment.status) {
+        case AppointmentStatus.CONFIRMED:
+            return <Badge status="success" icon="fa-check">{t.status_confirmed}</Badge>;
+        default:
+            return <Badge status="warning" icon="fa-clock">{t.status_pending}</Badge>;
+    }
+  };
+
+  return (
+    <Card variant="hover" className="group h-full flex flex-col justify-between">
+      <div>
+        <div className="flex justify-between items-start">
+            <div className="flex gap-4">
+            <Avatar src={provider?.imageUrl} name={provider?.name || 'Dr'} size="lg" className="rounded-2xl" />
+            <div>
+                <Text variant="h4">{service?.name}</Text>
+                <Text variant="caption" className="text-primary-600 font-bold">{provider?.name}</Text>
+                <Text variant="small" className="text-gray-400 mt-1 flex items-center gap-1 lowercase">
+                    <i className="fas fa-stethoscope"></i> {provider?.specialty}
+                </Text>
+            </div>
+            </div>
+            <div className="text-right rtl:text-left ltr:text-right px-4 py-2 rounded-xl bg-surface-hover group-hover:bg-primary-50 transition-colors">
+            <div className="text-xl font-black text-gray-900 group-hover:text-primary-700">
+                {dateObj.toLocaleTimeString(lang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+            <div className="text-xs text-gray-500 font-bold uppercase tracking-wide group-hover:text-primary-600/70">
+                {dateObj.toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { weekday: 'short', day: 'numeric' })}
+            </div>
+            </div>
+        </div>
+      </div>
+      
+      <div className="flex justify-between items-center pt-5 mt-4 border-t border-gray-100">
+        <div className="flex gap-2">
+             {getStatusBadge()}
+             <Badge status="info" icon="fa-video">
+                {t.online_visit}
+             </Badge>
+        </div>
+        
+        <div className="flex gap-2">
+            <Button size="sm" variant="ghost">
+                {t.reschedule}
+            </Button>
+            <Button size="sm" variant="danger" onClick={() => onCancel(appointment.id)} className="bg-red-50 hover:bg-red-100 text-red-600">
+                {t.cancel}
+            </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+const HistoryRow: React.FC<{ appointment: Appointment, t: any, lang: Language }> = ({ appointment, t, lang }) => {
   const service = SERVICES.find(s => s.id === appointment.serviceId);
   const provider = PROVIDERS.find(p => p.id === appointment.providerId);
   const dateObj = new Date(appointment.date);
@@ -34,51 +94,31 @@ const AppointmentCard: React.FC<{ appointment: Appointment, onCancel: (id: strin
   };
 
   return (
-    <Card variant="hover" className={`group ${isHistory ? 'bg-gray-50/50' : ''}`}>
-      <div className="flex justify-between items-start">
-        <div className="flex gap-4">
-          <Avatar src={provider?.imageUrl} name={provider?.name || 'Dr'} size="lg" className={`rounded-2xl ${isHistory ? 'grayscale opacity-70' : ''}`} />
-          <div>
-            <Text variant="h4" className={isHistory ? 'text-gray-600' : ''}>{service?.name}</Text>
-            <Text variant="caption" className={`${isHistory ? 'text-gray-500' : 'text-primary-600'} font-bold`}>{provider?.name}</Text>
-            <Text variant="small" className="text-gray-400 mt-1 flex items-center gap-1 lowercase">
-                <i className="fas fa-stethoscope"></i> {provider?.specialty}
-            </Text>
-          </div>
-        </div>
-        <div className={`text-right rtl:text-left ltr:text-right px-4 py-2 rounded-xl transition-colors ${isHistory ? 'bg-gray-100' : 'bg-surface-hover group-hover:bg-primary-50'}`}>
-          <div className={`text-xl font-black ${isHistory ? 'text-gray-500' : 'text-gray-900 group-hover:text-primary-700'}`}>
-            {dateObj.toLocaleTimeString(lang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
-          </div>
-          <div className={`text-xs text-gray-500 font-bold uppercase tracking-wide ${isHistory ? '' : 'group-hover:text-primary-600/70'}`}>
-            {dateObj.toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { weekday: 'short', day: 'numeric' })}
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex justify-between items-center pt-5 mt-4 border-t border-gray-100">
-        <div className="flex gap-2">
-            {isHistory ? getStatusBadge() : (
-                 <Badge status="info" icon="fa-video">
-                    {t.online_visit}
-                 </Badge>
-            )}
+    <div className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:bg-gray-50 group shadow-sm hover:shadow-md">
+      <div className="flex items-center gap-4 w-full sm:w-auto">
+        <div className="flex flex-col items-center justify-center w-14 h-14 bg-gray-50 rounded-xl border border-gray-100 shrink-0 group-hover:bg-white group-hover:shadow-sm transition-all">
+             <span className="text-xs font-bold text-gray-400 uppercase">{dateObj.toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { month: 'short' })}</span>
+             <span className="text-xl font-black text-gray-800">{dateObj.toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { day: 'numeric' })}</span>
         </div>
         
-        {!isHistory && (
-            <div className="flex gap-2">
-            <Button size="sm" variant="ghost">
-                {t.reschedule}
-            </Button>
-            <Button size="sm" variant="danger" onClick={() => onCancel(appointment.id)} className="bg-red-50 hover:bg-red-100 text-red-600">
-                {t.cancel}
-            </Button>
-            </div>
-        )}
+        <div className="flex-1">
+             <Text variant="h4" className="text-base text-gray-700">{service?.name}</Text>
+             <div className="flex items-center gap-2 mt-1">
+                <Avatar src={provider?.imageUrl} name={provider?.name || 'Dr'} size="sm" className="w-5 h-5 text-[10px]" />
+                <Text variant="caption" className="text-xs">{provider?.name}</Text>
+             </div>
+        </div>
       </div>
-    </Card>
+
+      <div className="flex items-center justify-between w-full sm:w-auto gap-4 pl-0 sm:pl-4 border-t sm:border-t-0 border-gray-50 pt-3 sm:pt-0">
+         <span className="text-sm font-bold text-gray-400 font-mono bg-gray-50 px-2 py-1 rounded-lg">
+            {dateObj.toLocaleTimeString(lang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+         </span>
+         {getStatusBadge()}
+      </div>
+    </div>
   );
-}
+};
 
 const PatientDashboard: React.FC<{ 
     appointments: Appointment[], 
@@ -143,7 +183,8 @@ const PatientDashboard: React.FC<{
                  matchesDate = matchesDate && d >= new Date(dateFrom).getTime();
             }
             if (dateTo && !isNaN(new Date(dateTo).getTime())) {
-                 matchesDate = matchesDate && d <= new Date(dateTo).getTime() + 86400000; // Include the end date
+                 // Add 1 day to include the end date completely
+                 matchesDate = matchesDate && d <= new Date(dateTo).getTime() + 86400000;
             }
         }
 
@@ -313,21 +354,31 @@ const PatientDashboard: React.FC<{
            </div>
         </div>
 
-        {/* Results Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Results Grid / List */}
+        <div>
             {filteredList.length > 0 ? (
-                filteredList.map(apt => (
-                  <AppointmentCard 
-                    key={apt.id} 
-                    appointment={apt} 
-                    onCancel={initiateCancel} 
-                    t={t} 
-                    lang={lang}
-                    isHistory={activeTab === 'history'}
-                  />
-                ))
+                <div className={activeTab === 'upcoming' ? "grid grid-cols-1 lg:grid-cols-2 gap-5" : "flex flex-col gap-3"}>
+                    {filteredList.map(apt => (
+                        activeTab === 'upcoming' ? (
+                            <AppointmentCard 
+                                key={apt.id} 
+                                appointment={apt} 
+                                onCancel={initiateCancel} 
+                                t={t} 
+                                lang={lang}
+                            />
+                        ) : (
+                            <HistoryRow 
+                                key={apt.id} 
+                                appointment={apt} 
+                                t={t} 
+                                lang={lang} 
+                            />
+                        )
+                    ))}
+                </div>
             ) : (
-                <div className="col-span-1 lg:col-span-2 text-center py-16 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
+                <div className="text-center py-16 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                          <i className={`fas ${activeTab === 'history' ? 'fa-history' : 'fa-calendar-times'} text-2xl`}></i>
                     </div>

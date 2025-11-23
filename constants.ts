@@ -42,23 +42,27 @@ export const TRANSLATIONS = {
     filter_confirmed: 'تایید شده',
     online_visit: 'ویزیت آنلاین',
     // Booking Flow
-    step_service: 'خدمت',
-    step_provider: 'پزشک',
-    step_datetime: 'زمان',
-    step_confirm: 'تایید',
-    ai_assistant: 'دستیار هوشمند',
+    step_service: 'انتخاب خدمت',
+    step_provider: 'انتخاب پزشک',
+    step_datetime: 'زمان رزرو',
+    step_confirm: 'تایید نهایی',
+    ai_assistant: 'دستیار هوشمند سلامت',
+    ai_title: 'چطور می‌توانیم به شما کمک کنیم؟',
+    ai_subtitle: 'علائم خود را بنویسید تا بهترین متخصص را پیشنهاد دهیم (مثلا: سردرد شدید دارم)',
     ai_placeholder: 'مثلا: درد شدید در ناحیه کمر دارم...',
     search: 'جستجو',
-    back: 'بازگشت',
+    back: 'مرحله قبل',
     check_final: 'بررسی نهایی',
-    confirm_book: 'تایید و رزرو',
-    summary_title: 'خلاصه رزرو',
-    summary_service: 'نوع خدمت',
-    summary_provider: 'پزشک معالج',
-    summary_time: 'تاریخ و زمان',
-    summary_cost: 'هزینه نهایی',
+    confirm_book: 'تایید و پرداخت',
+    summary_title: 'فیش رزرو',
+    summary_service: 'خدمت انتخابی',
+    summary_provider: 'پزشک متخصص',
+    summary_time: 'زمان مراجعه',
+    summary_cost: 'مبلغ قابل پرداخت',
+    summary_empty_provider: 'هنوز پزشکی انتخاب نشده',
+    summary_empty_time: 'زمان انتخاب نشده',
     currency: 'تومان',
-    available_slots: 'زمان‌های خالی برای',
+    available_slots: 'نوبت‌های خالی',
     // Provider Specific
     provider_stats_patients: 'کل بیماران',
     provider_stats_today: 'نوبت‌های امروز',
@@ -86,6 +90,38 @@ export const TRANSLATIONS = {
     cancel_confirm_message: 'آیا از لغو این نوبت اطمینان دارید؟',
     yes: 'بله',
     no: 'خیر',
+    // Profile
+    edit_profile: 'ویرایش پروفایل',
+    save_changes: 'ذخیره تغییرات',
+    cancel_edit: 'انصراف',
+    phone_number: 'شماره تماس',
+    location: 'موقعیت مکانی',
+    bio: 'درباره من',
+    specialty: 'تخصص',
+    experience: 'سابقه کار',
+    medical_history: 'سوابق پزشکی',
+    insurance_provider: 'بیمه تکمیلی',
+    emergency_contact: 'تماس اضطراری',
+    years: 'سال',
+    // Search & Filter
+    sort_by: 'مرتب‌سازی',
+    sort_rating: 'بالاترین امتیاز',
+    sort_default: 'پیش‌فرض',
+    filter_available_today: 'فقط امروز',
+    no_results_found: 'پزشکی یافت نشد',
+    pagination_next: 'بعدی',
+    pagination_prev: 'قبلی',
+    page: 'صفحه',
+    // Time Grouping
+    morning: 'صبح',
+    afternoon: 'ظهر و عصر',
+    evening: 'شب',
+    select_provider_btn: 'انتخاب پزشک',
+    change: 'تغییر',
+    // Auth Social
+    or_continue: 'یا ادامه دهید با',
+    google: 'گوگل',
+    facebook: 'فیس‌بوک',
   },
   en: {
     app_name: 'Nova Booking',
@@ -128,23 +164,27 @@ export const TRANSLATIONS = {
     filter_confirmed: 'Confirmed',
     online_visit: 'Online',
     // Booking Flow
-    step_service: 'Service',
-    step_provider: 'Doctor',
-    step_datetime: 'Date',
-    step_confirm: 'Confirm',
-    ai_assistant: 'AI Assistant',
+    step_service: 'Select Service',
+    step_provider: 'Select Doctor',
+    step_datetime: 'Date & Time',
+    step_confirm: 'Confirmation',
+    ai_assistant: 'AI Health Assistant',
+    ai_title: 'How can we help you?',
+    ai_subtitle: 'Describe your symptoms and we will recommend the best specialist.',
     ai_placeholder: 'e.g., I have severe back pain...',
     search: 'Search',
-    back: 'Back',
+    back: 'Go Back',
     check_final: 'Review',
-    confirm_book: 'Confirm & Book',
-    summary_title: 'Booking Summary',
+    confirm_book: 'Confirm & Pay',
+    summary_title: 'Booking Slip',
     summary_service: 'Service',
-    summary_provider: 'Provider',
-    summary_time: 'Date & Time',
-    summary_cost: 'Total Cost',
+    summary_provider: 'Specialist',
+    summary_time: 'Time',
+    summary_cost: 'Total',
+    summary_empty_provider: 'No doctor selected',
+    summary_empty_time: 'No time selected',
     currency: '$',
-    available_slots: 'Available slots for',
+    available_slots: 'Available slots',
     // Provider Specific
     provider_stats_patients: 'Total Patients',
     provider_stats_today: 'Today\'s Visits',
@@ -172,6 +212,38 @@ export const TRANSLATIONS = {
     cancel_confirm_message: 'Are you sure you want to cancel this appointment?',
     yes: 'Yes',
     no: 'No',
+    // Profile
+    edit_profile: 'Edit Profile',
+    save_changes: 'Save Changes',
+    cancel_edit: 'Cancel',
+    phone_number: 'Phone Number',
+    location: 'Location',
+    bio: 'Biography',
+    specialty: 'Specialty',
+    experience: 'Experience',
+    medical_history: 'Medical History',
+    insurance_provider: 'Insurance Provider',
+    emergency_contact: 'Emergency Contact',
+    years: 'Years',
+    // Search & Filter
+    sort_by: 'Sort By',
+    sort_rating: 'Highest Rating',
+    sort_default: 'Default',
+    filter_available_today: 'Available Today',
+    no_results_found: 'No doctors found',
+    pagination_next: 'Next',
+    pagination_prev: 'Prev',
+    page: 'Page',
+    // Time Grouping
+    morning: 'Morning',
+    afternoon: 'Afternoon',
+    evening: 'Evening',
+    select_provider_btn: 'Select Doctor',
+    change: 'Change',
+    // Auth Social
+    or_continue: 'Or continue with',
+    google: 'Google',
+    facebook: 'Facebook',
   }
 };
 
@@ -230,6 +302,46 @@ export const PROVIDERS: Provider[] = [
     availableSlots: [],
     bio: 'Holistic approach to general medicine and wellness.'
   },
+  {
+    id: 'p4',
+    name: 'Dr. Kaveh Tehrani',
+    specialty: 'Neurologist',
+    rating: 4.9,
+    imageUrl: 'https://picsum.photos/200/200?random=4',
+    services: ['s1'],
+    availableSlots: [],
+    bio: 'Expert in nervous system disorders.'
+  },
+  {
+    id: 'p5',
+    name: 'Dr. Elena Rostami',
+    specialty: 'Dermatologist',
+    rating: 4.6,
+    imageUrl: 'https://picsum.photos/200/200?random=5',
+    services: ['s1'],
+    availableSlots: [],
+    bio: 'Skin care specialist focusing on cosmetic procedures.'
+  },
+  {
+    id: 'p6',
+    name: 'Dr. Reza Alavi',
+    specialty: 'Orthopedic',
+    rating: 4.5,
+    imageUrl: 'https://picsum.photos/200/200?random=6',
+    services: ['s5'],
+    availableSlots: [],
+    bio: 'Specializes in bone and joint surgeries.'
+  },
+  {
+    id: 'p7',
+    name: 'Dr. Nasim Farhadi',
+    specialty: 'Pediatrician',
+    rating: 4.9,
+    imageUrl: 'https://picsum.photos/200/200?random=7',
+    services: ['s1'],
+    availableSlots: [],
+    bio: 'Dedicated to the health and well-being of children.'
+  }
 ];
 
 // Generate some initial mock appointments
@@ -271,10 +383,11 @@ export const INITIAL_APPOINTMENTS: Appointment[] = [
 export const generateSlots = (): string[] => {
   const slots: string[] = [];
   const today = new Date();
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 0; i <= 7; i++) {
     const day = new Date(today);
     day.setDate(today.getDate() + i);
-    [9, 14, 16].forEach(hour => {
+    // Add various times for grouping test
+    [9, 10, 11, 14, 15, 17, 18, 19].forEach(hour => {
       day.setHours(hour, 0, 0, 0);
       slots.push(day.toISOString());
     });

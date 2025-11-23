@@ -99,6 +99,27 @@ const Auth: React.FC<AuthProps> = ({ onLogin, lang }) => {
             </Button>
           </form>
 
+          {/* Social Login */}
+            <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-100"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white/80 backdrop-blur px-2 text-gray-400 font-bold tracking-wider">{t.or_continue}</span>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+                 <Button type="button" variant="secondary" className="w-full bg-white border border-gray-100 hover:bg-gray-50 text-gray-700">
+                    <i className="fab fa-google text-red-500 text-lg ltr:mr-2 rtl:ml-2"></i> 
+                    <span className="mx-2">{t.google}</span>
+                 </Button>
+                 <Button type="button" variant="secondary" className="w-full bg-white border border-gray-100 hover:bg-gray-50 text-gray-700">
+                    <i className="fab fa-facebook text-blue-600 text-lg ltr:mr-2 rtl:ml-2"></i>
+                    <span className="mx-2">{t.facebook}</span>
+                 </Button>
+            </div>
+
           <div className="mt-8 text-center">
             <Text variant="caption">
                 {isLogin ? t.new_here : t.already_account}

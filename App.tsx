@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Booking from './pages/Booking';
+import Profile from './pages/Profile';
 import { GlobalLoader } from './components/NovaUI';
 
 export type Language = 'fa' | 'en';
@@ -89,6 +90,18 @@ const App: React.FC = () => {
     }, 800);
   };
 
+  const handleUpdateUser = (updatedUser: User) => {
+    setLoading(true);
+    setTimeout(() => {
+        setState(prev => ({
+            ...prev,
+            user: updatedUser,
+            isLoading: false
+        }));
+        addNotification(t.save_changes, 'success');
+    }, 1000);
+  };
+
   const addNotification = (message: string, type: 'success' | 'error' | 'info') => {
     const id = Date.now().toString();
     setState(prev => ({
@@ -148,12 +161,12 @@ const App: React.FC = () => {
             onCancel={() => navigate('DASHBOARD')}
           />
         )}
-        {state.currentView === 'PROFILE' && (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
-            <i className="fas fa-user-circle text-6xl mb-4 text-gray-300"></i>
-            <h2 className="text-xl font-semibold">{t.profile}</h2>
-            <p className="mt-2 opacity-60">Feature coming soon.</p>
-          </div>
+        {state.currentView === 'PROFILE' && state.user && (
+          <Profile 
+            user={state.user} 
+            onUpdateUser={handleUpdateUser} 
+            lang={lang} 
+          />
         )}
       </Layout>
     </div>

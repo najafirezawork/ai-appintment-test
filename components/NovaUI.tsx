@@ -143,7 +143,7 @@ export const Input: React.FC<InputProps> = ({ label, icon, error, className = ''
 
 // --- 5. Badge ---
 
-export const Badge: React.FC<{ status: Status; children: React.ReactNode; icon?: string }> = ({ status, children, icon }) => {
+export const Badge: React.FC<{ status: Status; children: React.ReactNode; icon?: string; className?: string }> = ({ status, children, icon, className = '' }) => {
   const styles = {
     success: 'bg-emerald-50 text-emerald-600 border-emerald-100',
     warning: 'bg-amber-50 text-amber-600 border-amber-100',
@@ -153,7 +153,7 @@ export const Badge: React.FC<{ status: Status; children: React.ReactNode; icon?:
   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${styles[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${styles[status]} ${className}`}>
       {icon && <i className={`fas ${icon}`}></i>}
       {children}
     </span>
