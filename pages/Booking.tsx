@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Appointment, Service, Provider, AppointmentStatus } from '../types';
-import { SERVICES, PROVIDERS } from '../constants';
-import Button from '../components/Button';
+import { SERVICES, PROVIDERS, TRANSLATIONS } from '../constants';
+import { Button, Card, Text, Avatar, Badge, IconButton } from '../components/NovaUI';
 import { getSmartRecommendation } from '../services/geminiService';
 
 interface BookingProps {
@@ -19,16 +19,20 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState('');
+
+  const lang = document.documentElement.lang as 'fa' | 'en';
+  const t = TRANSLATIONS[lang] || TRANSLATIONS['fa'];
 
   // Filter providers based on selected service
   const availableProviders = selectedService 
     ? PROVIDERS.filter(p => p.services.includes(selectedService.id))
     : PROVIDERS;
 
-  const handleAiSearch = async (query: string) => {
-    if (!query.trim()) return;
+  const handleAiSearch = async () => {
+    if (!prompt.trim()) return;
     setAiLoading(true);
-    const result = await getSmartRecommendation(query);
+    const result = await getSmartRecommendation(prompt);
     setAiLoading(false);
 
     if (result) {
@@ -43,7 +47,6 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
       if (result.reasoning) {
         setAiSuggestion(result.reasoning);
       }
-      // If both found, jump to datetime
       if (result.serviceId && result.providerId) {
         setStep('DATETIME');
       } else if (result.serviceId) {
@@ -67,42 +70,42 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
   };
 
   const stepLabels: Record<Step, string> = {
-    SERVICE: 'خدمت',
-    PROVIDER: 'پزشک',
-    DATETIME: 'زمان',
-    CONFIRM: 'تایید'
+    SERVICE: t.step_service,
+    PROVIDER: t.step_provider,
+    DATETIME: t.step_datetime,
+    CONFIRM: t.step_confirm
   };
 
   const steps: Step[] = ['SERVICE', 'PROVIDER', 'DATETIME', 'CONFIRM'];
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col h-full max-h-[800px]">
+    <div className="bg-white rounded-3xl shadow-float border border-gray-100 overflow-hidden flex flex-col h-[calc(100vh-120px)] md:h-[800px] animate-slide-up">
       {/* Header with Steps */}
-      <div className="bg-gray-50 p-6 border-b border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-           <h2 className="text-xl font-bold text-gray-900">رزرو نوبت</h2>
-           <button onClick={onCancel} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
+      <div className="bg-white p-6 md:p-8 border-b border-gray-100 z-10">
+        <div className="flex justify-between items-center mb-8">
+           <Text variant="h2">{t.booking}</Text>
+           <IconButton icon="fa-times" onClick={onCancel} />
         </div>
         
         {/* Progress Bar */}
-        <div className="flex items-center justify-between relative" dir="rtl">
-          <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-200 -z-0"></div>
+        <div className="flex items-center justify-between relative px-2" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
+          <div className="absolute left-0 right-0 top-4 h-1 bg-gray-100 -z-0 rounded-full mx-4"></div>
           {steps.map((s, idx) => {
             const currentIdx = steps.indexOf(step);
             const isCompleted = idx < currentIdx;
             const isActive = idx === currentIdx;
             
             return (
-              <div key={s} className="z-10 flex flex-col items-center bg-gray-50 px-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                  isActive ? 'bg-primary text-white ring-4 ring-primary/20' : 
-                  isCompleted ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
+              <div key={s} className="z-10 flex flex-col items-center">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 border-4 border-white ${
+                  isActive ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30 scale-110' : 
+                  isCompleted ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500'
                 }`}>
                   {isCompleted ? <i className="fas fa-check"></i> : idx + 1}
                 </div>
-                <span className={`text-xs mt-1 font-medium ${isActive ? 'text-primary' : 'text-gray-400'}`}>
+                <Text variant="small" className={`mt-2 transition-colors ${isActive ? 'text-primary-600' : 'text-gray-400'}`}>
                   {stepLabels[s]}
-                </span>
+                </Text>
               </div>
             )
           })}
@@ -110,66 +113,69 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-surface">
         
         {/* Step 1: Service Selection */}
         {step === 'SERVICE' && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-3xl mx-auto">
             {/* AI Assistant Input */}
-            <div className="bg-gradient-to-l from-primary/5 to-blue-500/5 p-4 rounded-xl border border-primary/10">
-              <label className="text-sm font-bold text-primary mb-2 block">
-                <i className="fas fa-sparkles ml-1"></i> دستیار هوشمند
-              </label>
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  id="ai-prompt"
-                  placeholder="مثلا: 'درد شدید در ناحیه کمر دارم'"
-                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAiSearch((e.target as HTMLInputElement).value);
-                  }}
-                />
-                <Button 
-                  onClick={() => {
-                     const input = document.getElementById('ai-prompt') as HTMLInputElement;
-                     handleAiSearch(input.value);
-                  }}
-                  isLoading={aiLoading}
-                  className="shrink-0"
-                >
-                  جستجو
-                </Button>
-              </div>
-              {aiSuggestion && (
-                 <p className="text-xs text-gray-600 mt-2 bg-white p-2 rounded border border-gray-100 italic">
-                   "{aiSuggestion}"
-                 </p>
+            <div className="relative mb-10">
+               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-400 to-secondary rounded-2xl blur opacity-30 animate-pulse"></div>
+               <Card noPadding className="relative p-2 flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 text-lg shrink-0`}>
+                      <i className="fas fa-sparkles"></i>
+                  </div>
+                  <input 
+                    type="text" 
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder={t.ai_placeholder}
+                    className="flex-1 bg-transparent outline-none text-gray-800 placeholder-gray-400 h-12 px-2 font-medium"
+                    onKeyDown={(e) => e.key === 'Enter' && handleAiSearch()}
+                  />
+                  <Button 
+                    onClick={handleAiSearch}
+                    isLoading={aiLoading}
+                    className="rounded-xl px-6 h-12"
+                  >
+                    {t.search}
+                  </Button>
+               </Card>
+               {aiSuggestion && (
+                 <Card variant="white" className="mt-4 flex items-start gap-4 animate-fade-in border-primary-100">
+                    <div className="w-8 h-8 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center shrink-0 mt-1">
+                        <i className="fas fa-lightbulb"></i>
+                    </div>
+                    <Text variant="body" className="text-sm italic">
+                      "{aiSuggestion}"
+                    </Text>
+                 </Card>
               )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {SERVICES.map(service => (
-                <div 
+                <Card 
                   key={service.id}
+                  variant={selectedService?.id === service.id ? 'white' : 'white'}
                   onClick={() => {
                     setSelectedService(service);
                     setStep('PROVIDER');
                   }}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md flex items-center gap-4 ${
-                    selectedService?.id === service.id ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/50'
+                  className={`cursor-pointer transition-all hover:-translate-y-1 hover:shadow-card flex items-center gap-5 relative overflow-hidden group ${
+                    selectedService?.id === service.id ? 'ring-2 ring-primary-500 bg-primary-50/30' : ''
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${
-                    selectedService?.id === service.id ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-colors ${
+                    selectedService?.id === service.id ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30' : 'bg-gray-100 text-gray-400 group-hover:bg-primary-50 group-hover:text-primary-600'
                   }`}>
                     <i className={`fas ${service.icon}`}></i>
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900">{service.name}</h3>
-                    <p className="text-xs text-gray-500">{service.duration} دقیقه • {service.price} تومان</p>
+                    <Text variant="h4" className="mb-1">{service.name}</Text>
+                    <Text variant="caption">{service.duration} min • <span className="text-primary-600 font-bold">{service.price} {t.currency}</span></Text>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
@@ -177,44 +183,42 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
 
         {/* Step 2: Provider Selection */}
         {step === 'PROVIDER' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
              {availableProviders.map(provider => (
-                <div 
+                <Card 
                   key={provider.id}
                   onClick={() => {
                     setSelectedProvider(provider);
                     setStep('DATETIME');
                   }}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md flex items-start gap-4 ${
-                    selectedProvider?.id === provider.id ? 'border-primary bg-primary/5' : 'border-gray-100 hover:border-primary/50'
+                  className={`cursor-pointer transition-all hover:shadow-card hover:-translate-y-1 group ${
+                    selectedProvider?.id === provider.id ? 'ring-2 ring-primary-500' : ''
                   }`}
                 >
-                  <img src={provider.imageUrl} alt={provider.name} className="w-16 h-16 rounded-full object-cover bg-gray-200" />
-                  <div>
-                    <h3 className="font-bold text-gray-900">{provider.name}</h3>
-                    <p className="text-sm text-primary font-medium">{provider.specialty}</p>
-                    <div className="flex items-center gap-1 text-xs text-amber-500 mt-1">
-                      <i className="fas fa-star"></i> {provider.rating}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2 line-clamp-2">{provider.bio}</p>
+                  <div className="flex flex-col items-center text-center">
+                      <Avatar src={provider.imageUrl} name={provider.name} size="xl" className="mb-4 group-hover:scale-105 transition-transform" />
+                      <Text variant="h3" className="mb-1">{provider.name}</Text>
+                      <Text variant="caption" className="text-primary-600 font-bold mb-3 uppercase tracking-wider">{provider.specialty}</Text>
+                      <Badge status="warning" icon="fa-star">{provider.rating}</Badge>
+                      <Text variant="body" className="text-sm text-gray-500 mt-4 line-clamp-2">{provider.bio}</Text>
                   </div>
-                </div>
+                </Card>
              ))}
           </div>
         )}
 
         {/* Step 3: Date & Time */}
         {step === 'DATETIME' && selectedProvider && (
-          <div>
-            <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 rounded-lg">
-               <img src={selectedProvider.imageUrl} className="w-10 h-10 rounded-full" />
+          <div className="max-w-4xl mx-auto">
+            <Card className="flex items-center gap-4 mb-8">
+               <Avatar src={selectedProvider.imageUrl} name={selectedProvider.name} size="md" />
                <div>
-                 <p className="text-sm text-gray-500">زمان‌های خالی برای</p>
-                 <p className="font-bold text-gray-900">{selectedProvider.name}</p>
+                 <Text variant="small" className="text-gray-400 mb-0.5">{t.available_slots}</Text>
+                 <Text variant="h4">{selectedProvider.name}</Text>
                </div>
-            </div>
+            </Card>
 
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {selectedProvider.availableSlots.map(slot => {
                 const date = new Date(slot);
                 const isSelected = selectedSlot === slot;
@@ -222,14 +226,18 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
                   <button
                     key={slot}
                     onClick={() => setSelectedSlot(slot)}
-                    className={`p-3 rounded-lg border text-center transition-all ${
+                    className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col items-center gap-1 ${
                       isSelected 
-                      ? 'bg-primary text-white border-primary shadow-md' 
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-primary/50'
+                      ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-600/20 scale-105' 
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-primary-300 hover:shadow-soft'
                     }`}
                   >
-                    <div className="text-xs opacity-80">{date.toLocaleDateString('fa-IR', { weekday: 'short', day: 'numeric' })}</div>
-                    <div className="font-bold">{date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</div>
+                    <Text variant="small" className={`${isSelected ? 'text-primary-100' : 'text-gray-400'}`}>
+                        {date.toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { weekday: 'short', day: 'numeric' })}
+                    </Text>
+                    <Text variant="h4" className={`text-lg font-black tracking-tight ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                        {date.toLocaleTimeString(lang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
                   </button>
                 )
               })}
@@ -239,36 +247,43 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
 
         {/* Step 4: Confirmation */}
         {step === 'CONFIRM' && selectedService && selectedProvider && selectedSlot && (
-           <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-             <h3 className="font-bold text-gray-900 mb-4">خلاصه رزرو</h3>
-             
-             <div className="space-y-4">
-               <div className="flex justify-between border-b border-gray-200 pb-2">
-                 <span className="text-gray-500">خدمت</span>
-                 <span className="font-medium">{selectedService.name}</span>
+           <Card className="max-w-md mx-auto" noPadding>
+             <div className="bg-primary-50 p-6 border-b border-primary-100">
+                <Text variant="h3" className="text-primary-800 text-center">{t.summary_title}</Text>
+             </div>
+             <div className="p-8 space-y-6">
+               <div className="flex justify-between items-center">
+                 <Text variant="caption">{t.summary_service}</Text>
+                 <Text variant="h4">{selectedService.name}</Text>
                </div>
-               <div className="flex justify-between border-b border-gray-200 pb-2">
-                 <span className="text-gray-500">پزشک</span>
-                 <span className="font-medium">{selectedProvider.name}</span>
+               <div className="flex justify-between items-center">
+                 <Text variant="caption">{t.summary_provider}</Text>
+                 <div className="flex items-center gap-2">
+                    <Avatar src={selectedProvider.imageUrl} name={selectedProvider.name} size="sm" />
+                    <Text variant="body" className="font-bold">{selectedProvider.name}</Text>
+                 </div>
                </div>
-               <div className="flex justify-between border-b border-gray-200 pb-2">
-                 <span className="text-gray-500">تاریخ و زمان</span>
-                 <span className="font-medium">
-                   {new Date(selectedSlot).toLocaleString('fa-IR', { dateStyle: 'medium', timeStyle: 'short' })}
-                 </span>
+               <div className="flex justify-between items-center">
+                 <Text variant="caption">{t.summary_time}</Text>
+                 <Badge status="neutral">
+                   {new Date(selectedSlot).toLocaleString(lang === 'fa' ? 'fa-IR' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                 </Badge>
                </div>
-               <div className="flex justify-between pt-2">
-                 <span className="text-gray-500">هزینه نهایی</span>
-                 <span className="font-bold text-xl text-primary">{selectedService.price} تومان</span>
+               
+               <div className="border-t border-dashed border-gray-200 pt-6 mt-6">
+                 <div className="flex justify-between items-end">
+                    <Text variant="caption">{t.summary_cost}</Text>
+                    <Text variant="h2" className="text-primary-600">{selectedService.price} {t.currency}</Text>
+                 </div>
                </div>
              </div>
-           </div>
+           </Card>
         )}
       </div>
 
       {/* Footer Actions */}
-      <div className="p-6 border-t border-gray-100 flex justify-between bg-white">
-        {step !== 'SERVICE' && (
+      <div className="p-6 md:p-8 border-t border-gray-100 flex justify-between bg-white z-10">
+        {step !== 'SERVICE' ? (
           <Button 
             variant="secondary" 
             onClick={() => {
@@ -276,16 +291,18 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
               else if (step === 'DATETIME') setStep('PROVIDER');
               else if (step === 'PROVIDER') setStep('SERVICE');
             }}
+            icon={lang === 'fa' ? 'fa-arrow-right' : 'fa-arrow-left'}
           >
-            بازگشت
+            {t.back}
           </Button>
-        )}
-        <div className="mr-auto">
+        ) : <div></div>}
+        
+        <div className={`flex-1 flex justify-end`}>
            {step === 'DATETIME' && (
-             <Button disabled={!selectedSlot} onClick={() => setStep('CONFIRM')}>بررسی نهایی</Button>
+             <Button disabled={!selectedSlot} onClick={() => setStep('CONFIRM')} icon="fa-check">{t.check_final}</Button>
            )}
            {step === 'CONFIRM' && (
-             <Button onClick={handleConfirm}>تایید و رزرو</Button>
+             <Button onClick={handleConfirm} className="px-8 shadow-xl shadow-primary-600/30">{t.confirm_book}</Button>
            )}
         </div>
       </div>

@@ -56,6 +56,7 @@ export interface AppState {
   currentView: ViewState;
   appointments: Appointment[];
   notifications: Notification[];
+  isLoading: boolean;
 }
 
 export interface Notification {

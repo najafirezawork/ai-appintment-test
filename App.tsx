@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Booking from './pages/Booking';
+import { GlobalLoader } from './components/NovaUI';
 
 export type Language = 'fa' | 'en';
 
@@ -15,6 +16,7 @@ const App: React.FC = () => {
     currentView: 'AUTH',
     appointments: INITIAL_APPOINTMENTS,
     notifications: [],
+    isLoading: false,
   });
 
   const t = TRANSLATIONS[lang];
@@ -31,10 +33,23 @@ const App: React.FC = () => {
     }
   }, [lang]);
 
+  const setLoading = (loading: boolean) => {
+    setState(prev => ({ ...prev, isLoading: loading }));
+  };
+
   const handleLogin = (role: UserRole) => {
-    const user = role === UserRole.PATIENT ? MOCK_USER_PATIENT : MOCK_USER_PROVIDER;
-    setState(prev => ({ ...prev, user: user, currentView: 'DASHBOARD' }));
-    addNotification(`${t.welcome} ${user.name}`, 'success');
+    setLoading(true);
+    // Simulate API call delay for login
+    setTimeout(() => {
+      const user = role === UserRole.PATIENT ? MOCK_USER_PATIENT : MOCK_USER_PROVIDER;
+      setState(prev => ({ 
+        ...prev, 
+        user: user, 
+        currentView: 'DASHBOARD',
+        isLoading: false 
+      }));
+      addNotification(`${t.welcome} ${user.name}`, 'success');
+    }, 1500);
   };
 
   const handleLogout = () => {
@@ -46,22 +61,32 @@ const App: React.FC = () => {
   };
 
   const addAppointment = (apt: Appointment) => {
-    setState(prev => ({
-      ...prev,
-      appointments: [...prev.appointments, apt],
-      currentView: 'DASHBOARD'
-    }));
-    addNotification(t.status_confirmed, 'success');
+    setLoading(true);
+    // Simulate API call delay for booking
+    setTimeout(() => {
+      setState(prev => ({
+        ...prev,
+        appointments: [...prev.appointments, apt],
+        currentView: 'DASHBOARD',
+        isLoading: false
+      }));
+      addNotification(t.status_confirmed, 'success');
+    }, 1500);
   };
 
   const cancelAppointment = (id: string) => {
-    setState(prev => ({
-      ...prev,
-      appointments: prev.appointments.map(a => 
-        a.id === id ? { ...a, status: AppointmentStatus.CANCELLED } : a
-      )
-    }));
-    addNotification(t.status_cancelled, 'info');
+    // Simulate short delay for cancellation
+    setLoading(true);
+    setTimeout(() => {
+      setState(prev => ({
+        ...prev,
+        appointments: prev.appointments.map(a => 
+          a.id === id ? { ...a, status: AppointmentStatus.CANCELLED } : a
+        ),
+        isLoading: false
+      }));
+      addNotification(t.status_cancelled, 'info');
+    }, 800);
   };
 
   const addNotification = (message: string, type: 'success' | 'error' | 'info') => {
@@ -80,6 +105,8 @@ const App: React.FC = () => {
 
   return (
     <div className="relative">
+      {state.isLoading && <GlobalLoader />}
+
       {/* Global Notification Toast */}
       <div className={`fixed top-4 ${lang === 'fa' ? 'left-4' : 'right-4'} z-50 flex flex-col gap-2 pointer-events-none`}>
         {state.notifications.map(n => (
@@ -111,6 +138,7 @@ const App: React.FC = () => {
             onNewBooking={() => navigate('BOOKING')}
             onCancel={cancelAppointment}
             lang={lang}
+            setLoading={setLoading}
           />
         )}
         {state.currentView === 'BOOKING' && state.user && (

@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { User, ViewState } from '../types';
 import { TRANSLATIONS } from '../constants';
 import { Language } from '../App';
+import { Avatar, Text } from './NovaUI';
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,9 +21,9 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentView, onNavigate
     // Only show lang switcher on Auth page top right
     return (
       <div className="relative">
-        <div className="absolute top-4 right-4 z-50 flex gap-2">
-             <button onClick={() => setLang('fa')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${lang === 'fa' ? 'bg-primary text-white shadow-lg' : 'bg-white text-gray-600'}`}>فا</button>
-             <button onClick={() => setLang('en')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${lang === 'en' ? 'bg-primary text-white shadow-lg' : 'bg-white text-gray-600'}`}>EN</button>
+        <div className="absolute top-6 right-6 z-50 flex gap-2">
+             <button onClick={() => setLang('fa')} className={`w-10 h-10 rounded-xl text-xs font-bold transition-all border ${lang === 'fa' ? 'bg-primary-600 text-white border-primary-600 shadow-lg' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>فا</button>
+             <button onClick={() => setLang('en')} className={`w-10 h-10 rounded-xl text-xs font-bold transition-all border ${lang === 'en' ? 'bg-primary-600 text-white border-primary-600 shadow-lg' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>EN</button>
         </div>
         {children}
       </div>
@@ -34,22 +35,22 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentView, onNavigate
       
       {/* Mobile Header */}
       <div className="md:hidden bg-white/80 backdrop-blur-md border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-30">
-        <h1 className="text-xl font-black text-primary flex items-center gap-2">
+        <h1 className="text-xl font-black text-primary-600 flex items-center gap-2">
           <i className="fas fa-heart-pulse"></i> {t.app_name}
         </h1>
         <div className="flex gap-3 items-center">
             <button onClick={() => setLang(lang === 'fa' ? 'en' : 'fa')} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
                 {lang === 'fa' ? 'EN' : 'فا'}
             </button>
-            <img src={user.avatarUrl} className="w-8 h-8 rounded-full bg-gray-200" />
+            <Avatar src={user.avatarUrl} name={user.name} size="sm" />
         </div>
       </div>
 
       {/* Sidebar Navigation (Desktop) */}
-      <aside className="hidden md:flex flex-col w-72 bg-white h-screen sticky top-0 shadow-2xl shadow-gray-200/50 z-20">
+      <aside className="hidden md:flex flex-col w-72 bg-white h-screen sticky top-0 shadow-float z-20 border-r border-gray-100/50">
         <div className="p-8">
-           <h1 className="text-2xl font-black text-primary flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3 tracking-tight">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30">
                 <i className="fas fa-heart-pulse"></i>
             </div>
             {t.app_name}
@@ -58,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentView, onNavigate
 
         <nav className="flex-1 px-4 space-y-2">
           <NavItem 
-            icon="fa-grid-2" 
+            icon="fa-th-large" 
             label={t.dashboard} 
             active={currentView === 'DASHBOARD'} 
             onClick={() => onNavigate('DASHBOARD')} 
@@ -81,15 +82,15 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentView, onNavigate
 
         <div className="p-6 mt-auto">
           {/* Language Switcher */}
-          <div className="bg-gray-50 rounded-xl p-1 flex mb-6">
-             <button onClick={() => setLang('fa')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === 'fa' ? 'bg-white text-primary shadow-sm' : 'text-gray-500'}`}>فارسی</button>
-             <button onClick={() => setLang('en')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === 'en' ? 'bg-white text-primary shadow-sm' : 'text-gray-500'}`}>English</button>
+          <div className="bg-gray-50 rounded-xl p-1.5 flex mb-6 border border-gray-100">
+             <button onClick={() => setLang('fa')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === 'fa' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>فارسی</button>
+             <button onClick={() => setLang('en')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === 'en' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>English</button>
           </div>
 
-          <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-            <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full bg-gray-200 object-cover" />
+          <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50/80 rounded-2xl border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer group">
+            <Avatar src={user.avatarUrl} name={user.name} />
             <div className="overflow-hidden">
-              <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+              <p className="text-sm font-bold text-gray-900 truncate group-hover:text-primary-700 transition-colors">{user.name}</p>
               <p className="text-xs text-gray-500 truncate capitalize">{user.role.toLowerCase()}</p>
             </div>
           </div>
@@ -103,26 +104,26 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentView, onNavigate
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto h-[calc(100vh-65px)] md:h-screen p-4 md:p-10 relative">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-1 overflow-y-auto h-[calc(100vh-65px)] md:h-screen p-4 md:p-8 lg:p-12 relative scroll-smooth">
+        <div className="max-w-7xl mx-auto">
           {children}
         </div>
       </main>
       
       {/* Mobile Bottom Nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-200 flex justify-around p-3 z-30 pb-safe">
-         <button onClick={() => onNavigate('DASHBOARD')} className={`flex flex-col items-center w-16 ${currentView === 'DASHBOARD' ? 'text-primary' : 'text-gray-400'}`}>
-           <i className="fas fa-grid-2 text-xl mb-1"></i>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-200 flex justify-around p-3 z-30 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+         <button onClick={() => onNavigate('DASHBOARD')} className={`flex flex-col items-center w-16 transition-colors ${currentView === 'DASHBOARD' ? 'text-primary-600' : 'text-gray-400'}`}>
+           <i className="fas fa-th-large text-xl mb-1"></i>
            <span className="text-[10px] font-bold">{t.dashboard}</span>
          </button>
          {user.role === 'PATIENT' && (
-            <button onClick={() => onNavigate('BOOKING')} className={`flex flex-col items-center w-16 -mt-8`}>
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 ${currentView === 'BOOKING' ? 'bg-primary text-white' : 'bg-gray-800 text-white'}`}>
+            <button onClick={() => onNavigate('BOOKING')} className={`flex flex-col items-center w-16 -mt-10`}>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-600/30 transition-transform active:scale-95 ${currentView === 'BOOKING' ? 'bg-primary-600 text-white rotate-3' : 'bg-gray-800 text-white'}`}>
                 <i className="fas fa-plus text-2xl"></i>
             </div>
             </button>
          )}
-         <button onClick={() => onNavigate('PROFILE')} className={`flex flex-col items-center w-16 ${currentView === 'PROFILE' ? 'text-primary' : 'text-gray-400'}`}>
+         <button onClick={() => onNavigate('PROFILE')} className={`flex flex-col items-center w-16 transition-colors ${currentView === 'PROFILE' ? 'text-primary-600' : 'text-gray-400'}`}>
            <i className="fas fa-user text-xl mb-1"></i>
            <span className="text-[10px] font-bold">{t.profile}</span>
          </button>
@@ -136,11 +137,11 @@ const NavItem: React.FC<{ icon: string, label: string, active: boolean, onClick:
     onClick={onClick}
     className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 ${
       active 
-        ? 'bg-primary text-white shadow-lg shadow-primary/30 translate-x-1 rtl:-translate-x-1' 
+        ? 'bg-primary-50 text-primary-700 shadow-sm translate-x-1 rtl:-translate-x-1' 
         : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
     }`}
   >
-    <i className={`fas ${icon} w-5 text-center`}></i>
+    <i className={`fas ${icon} w-5 text-center ${active ? 'text-primary-600' : 'text-gray-400'}`}></i>
     {label}
   </button>
 );
