@@ -109,14 +109,18 @@ const Auth: React.FC<AuthProps> = ({ onLogin, lang }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                  <Button type="button" variant="secondary" className="w-full bg-white border border-gray-100 hover:bg-gray-50 text-gray-700">
                     <i className="fab fa-google text-red-500 text-lg ltr:mr-2 rtl:ml-2"></i> 
-                    <span className="mx-2">{t.google}</span>
+                    <span className="hidden sm:inline mx-1">{t.google}</span>
                  </Button>
                  <Button type="button" variant="secondary" className="w-full bg-white border border-gray-100 hover:bg-gray-50 text-gray-700">
                     <i className="fab fa-facebook text-blue-600 text-lg ltr:mr-2 rtl:ml-2"></i>
-                    <span className="mx-2">{t.facebook}</span>
+                    <span className="hidden sm:inline mx-1">{t.facebook}</span>
+                 </Button>
+                 <Button type="button" variant="secondary" className="w-full bg-white border border-gray-100 hover:bg-gray-50 text-gray-700">
+                    <i className="fab fa-apple text-gray-900 text-lg ltr:mr-2 rtl:ml-2"></i>
+                    <span className="hidden sm:inline mx-1">{t.apple}</span>
                  </Button>
             </div>
 

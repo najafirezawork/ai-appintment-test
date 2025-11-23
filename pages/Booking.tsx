@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { User, Appointment, Service, Provider, AppointmentStatus } from '../types';
 import { SERVICES, PROVIDERS, TRANSLATIONS } from '../constants';
@@ -491,12 +492,17 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
                                 const slots = slotsByDate[dateKey] || [];
                                 const isAvailable = slots.length > 0;
                                 const isSelected = selectedDateKey === dateKey;
+                                const fullDate = date.toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                                const statusLabel = !isAvailable ? (lang === 'fa' ? 'غیرقابل دسترس' : 'unavailable') : (isSelected ? (lang === 'fa' ? 'انتخاب شده' : 'selected') : '');
+                                const ariaLabel = `${fullDate} ${statusLabel}`;
                                 
                                 return (
                                     <button
                                         key={dateKey}
                                         onClick={() => isAvailable && setSelectedDateKey(dateKey)}
                                         disabled={!isAvailable}
+                                        aria-label={ariaLabel}
+                                        aria-pressed={isSelected}
                                         className={`flex flex-col items-center justify-center min-w-[70px] sm:min-w-[85px] py-4 rounded-2xl transition-all snap-start border ${
                                             isSelected 
                                             ? 'bg-gray-900 text-white border-gray-900 shadow-lg scale-105' 
@@ -534,6 +540,8 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
                                                 <button
                                                     key={slot}
                                                     onClick={() => setSelectedSlot(slot)}
+                                                    aria-label={`${new Date(slot).toLocaleTimeString(lang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}${selectedSlot === slot ? (lang === 'fa' ? ' انتخاب شده' : ' selected') : ''}`}
+                                                    aria-pressed={selectedSlot === slot}
                                                     className={`py-2 px-3 rounded-xl text-sm font-bold transition-all border ${
                                                         selectedSlot === slot 
                                                         ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-600/30 transform scale-105' 
@@ -557,6 +565,8 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
                                                 <button
                                                     key={slot}
                                                     onClick={() => setSelectedSlot(slot)}
+                                                    aria-label={`${new Date(slot).toLocaleTimeString(lang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}${selectedSlot === slot ? (lang === 'fa' ? ' انتخاب شده' : ' selected') : ''}`}
+                                                    aria-pressed={selectedSlot === slot}
                                                     className={`py-2 px-3 rounded-xl text-sm font-bold transition-all border ${
                                                         selectedSlot === slot 
                                                         ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-600/30 transform scale-105' 
@@ -580,6 +590,8 @@ const Booking: React.FC<BookingProps> = ({ user, onBookingComplete, onCancel }) 
                                                 <button
                                                     key={slot}
                                                     onClick={() => setSelectedSlot(slot)}
+                                                    aria-label={`${new Date(slot).toLocaleTimeString(lang === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}${selectedSlot === slot ? (lang === 'fa' ? ' انتخاب شده' : ' selected') : ''}`}
+                                                    aria-pressed={selectedSlot === slot}
                                                     className={`py-2 px-3 rounded-xl text-sm font-bold transition-all border ${
                                                         selectedSlot === slot 
                                                         ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-600/30 transform scale-105' 

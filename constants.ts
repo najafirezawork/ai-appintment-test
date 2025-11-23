@@ -122,6 +122,7 @@ export const TRANSLATIONS = {
     or_continue: 'یا ادامه دهید با',
     google: 'گوگل',
     facebook: 'فیس‌بوک',
+    apple: 'اپل',
   },
   en: {
     app_name: 'Nova Booking',
@@ -244,6 +245,7 @@ export const TRANSLATIONS = {
     or_continue: 'Or continue with',
     google: 'Google',
     facebook: 'Facebook',
+    apple: 'Apple',
   }
 };
 
