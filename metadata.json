@@ -1,0 +1,5 @@
+{
+  "name": "NovaBooking AI",
+  "description": "A smart appointment scheduling system featuring AI-driven provider recommendations, calendar management, and seamless booking flows.",
+  "requestFramePermissions": []
+}
